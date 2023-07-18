@@ -12,8 +12,8 @@ from parser_app.models import Info
 
 
 class MedCentersParser:
-    # BASE_URL = 'https://widget.nhsd.healthdirect.org.au/v1/widget/search/detail?widgetId=9b5494f2-b4e6-495b-8d9c-e813dcebb7ca&types=%5Bservices_types%5D%3Ageneral+practice+service&id=d6f0fb19-c441-d90d-020c-f28da73650d6'
-    BASE_URL = 'https://widget.nhsd.healthdirect.org.au/v1/widget/search?widgetId=9b5494f2-b4e6-495b-8d9c-e813dcebb7ca&types=%5Bservices_types%5D%3Ageneral+practice+service&delivery=PHYSICAL'
+    BASE_URL = 'https://widget.nhsd.healthdirect.org.au/v1/widget/search/detail?widgetId=9b5494f2-b4e6-495b-8d9c-e813dcebb7ca&types=%5Bservices_types%5D%3Ageneral+practice+service&id=d6f0fb19-c441-d90d-020c-f28da73650d6'
+    # BASE_URL = 'https://widget.nhsd.healthdirect.org.au/v1/widget/search?widgetId=9b5494f2-b4e6-495b-8d9c-e813dcebb7ca&types=%5Bservices_types%5D%3Ageneral+practice+service&delivery=PHYSICAL'
 
     def __init__(self):
         browser_options = ChromeOptions()
@@ -45,23 +45,21 @@ class MedCentersParser:
     def placer_medcenter_parser(self):
         self.open_site()
         self.get_list_medcenters()
-        # self.get_info_single_medcenter_practitioner()
 
     def open_site(self):
         self.driver.get(self.BASE_URL)
         self._wait_and_choose_element('.ListItem__AppListItem-sc-1u2qtmw-0.mbJey')
 
     def get_list_medcenters(self):
-        # count = self._wait_and_choose_element('[class="ResultsLabel__Container-sc-13glsot-0 fucLsQ"]').text
-        # count = count.split(' ')[-1][:-1]
-        # print(count)
         index = 1
-        start = 0
         while True:
-            print(index)
-            element = self._wait_and_choose_element(
-                f'[class="ResultList__Container-sc-81kt74-0 cFqhkR"] li:nth-of-type({index})'
-            )
+            try:
+                element = self._wait_and_choose_element(
+                    f'[class="ResultList__Container-sc-81kt74-0 cFqhkR"] li:nth-of-type({index})',
+                    timeout=15,
+                )
+            except TimeoutException:
+                break
             try:
                 element.click()
             except ElementClickInterceptedException:
@@ -139,7 +137,6 @@ class MedCentersParser:
             except NoSuchElementException:
                 practitioner_lang = None
             defaults = {
-                # 'name': name,
                 'address': address,
                 'phone': phone,
                 'practitioner_name': practitioner_name,
@@ -147,7 +144,6 @@ class MedCentersParser:
                 'practitioner_sex': practitioner_sex,
                 'practitioner_lang': practitioner_lang,
             }
-            # print(defaults)
             Info.objects.get_or_create(
                 name=name,
                 practitioner_name=practitioner_name,
