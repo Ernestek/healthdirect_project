@@ -12,8 +12,8 @@ from parser_app.models import Info
 
 
 class MedCentersParser:
-    BASE_URL = 'https://widget.nhsd.healthdirect.org.au/v1/widget/search/detail?widgetId=9b5494f2-b4e6-495b-8d9c-e813dcebb7ca&types=%5Bservices_types%5D%3Ageneral+practice+service&id=d6f0fb19-c441-d90d-020c-f28da73650d6'
-    # BASE_URL = 'https://widget.nhsd.healthdirect.org.au/v1/widget/search?widgetId=9b5494f2-b4e6-495b-8d9c-e813dcebb7ca&types=%5Bservices_types%5D%3Ageneral+practice+service&delivery=PHYSICAL'
+    # BASE_URL = 'https://widget.nhsd.healthdirect.org.au/v1/widget/search/detail?widgetId=9b5494f2-b4e6-495b-8d9c-e813dcebb7ca&types=%5Bservices_types%5D%3Ageneral+practice+service&id=d6f0fb19-c441-d90d-020c-f28da73650d6'
+    BASE_URL = 'https://widget.nhsd.healthdirect.org.au/v1/widget/search?widgetId=9b5494f2-b4e6-495b-8d9c-e813dcebb7ca&types=%5Bservices_types%5D%3Ageneral+practice+service&delivery=PHYSICAL'
 
     def __init__(self):
         browser_options = ChromeOptions()
@@ -70,7 +70,6 @@ class MedCentersParser:
             index += 1
 
     def get_info_single_medcenter_practitioner(self):
-        # self._wait_and_choose_element('.ListItem__AppListItem-sc-1u2qtmw-0.mbJey').click()
         self._wait_and_choose_element('.ResultItem__Container-sc-1g9cevh-0.gdtonB')
         try:
             name = self._wait_and_choose_element('[class="ResultItem__Name-sc-1g9cevh-7 ceIVVX"]').text
@@ -83,16 +82,30 @@ class MedCentersParser:
         except TimeoutException:
             address = None
         try:
-            phone = self._wait_and_choose_element(
+            email = self.driver.find_element(
+                By.XPATH,
+                '//*[text()="Email: "]/a'
+            ).text.strip()
+        except NoSuchElementException:
+            email = None
+        try:
+            website = self.driver.find_element(
+                By.CSS_SELECTOR,
+                '.dWJGdN + [class="ResultItem__CommsLink-sc-1g9cevh-23 heyebz"]'
+            ).text.strip()
+        except NoSuchElementException:
+            website = None
+        try:
+            phone = self.driver.find_element(
+                By.CSS_SELECTOR,
                 '[class="ResultItem__CommsLink-sc-1g9cevh-23 heyebz"]'
             ).text.strip()
-        except TimeoutException:
+        except NoSuchElementException:
             phone = None
         try:
             practitioners = self.driver.find_elements(
                 By.CSS_SELECTOR, '[class="ResultItem__PractitionerList-sc-1g9cevh-18 jkstcs"] li'
             )
-            # practitioner_name = list(map(lambda x: x.text, practitioners))
 
         except NoSuchElementException:
             practitioners = None
@@ -101,6 +114,8 @@ class MedCentersParser:
             defaults = {
                 'address': address,
                 'phone': phone,
+                'email': email,
+                'website': website,
             }
             Info.objects.get_or_create(
                 name=name,
@@ -139,11 +154,14 @@ class MedCentersParser:
             defaults = {
                 'address': address,
                 'phone': phone,
+                'email': email,
+                'website': website,
                 'practitioner_name': practitioner_name,
                 'practitioner_profession': practitioner_profession,
                 'practitioner_sex': practitioner_sex,
                 'practitioner_lang': practitioner_lang,
             }
+            # print(defaults)
             Info.objects.get_or_create(
                 name=name,
                 practitioner_name=practitioner_name,
