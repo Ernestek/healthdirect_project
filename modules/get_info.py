@@ -12,7 +12,7 @@ from parser_app.models import Info
 
 
 class MedCentersParser:
-    # BASE_URL = 'https://widget.nhsd.healthdirect.org.au/v1/widget/search/detail?widgetId=9b5494f2-b4e6-495b-8d9c-e813dcebb7ca&types=%5Bservices_types%5D%3Ageneral+practice+service&id=d6f0fb19-c441-d90d-020c-f28da73650d6'
+
     BASE_URL = 'https://widget.nhsd.healthdirect.org.au/v1/widget/search?widgetId=9b5494f2-b4e6-495b-8d9c-e813dcebb7ca&types=%5Bservices_types%5D%3Ageneral+practice+service&delivery=PHYSICAL'
 
     def __init__(self):
@@ -67,7 +67,7 @@ class MedCentersParser:
             time.sleep(1)
             try:
                 self.get_info_single_medcenter_practitioner()
-            except:
+            except TimeoutException:
                 continue
 
             index += 1
