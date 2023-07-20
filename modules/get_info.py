@@ -65,7 +65,10 @@ class MedCentersParser:
             except ElementClickInterceptedException:
                 continue
             time.sleep(1)
-            self.get_info_single_medcenter_practitioner()
+            try:
+                self.get_info_single_medcenter_practitioner()
+            except:
+                continue
 
             index += 1
 
@@ -88,6 +91,13 @@ class MedCentersParser:
             ).text.strip()
         except NoSuchElementException:
             email = None
+        try:
+            fax = self.driver.find_element(
+                By.XPATH,
+                '//*[text()="Fax: "]'
+            ).text.replace('Fax:', '').strip()
+        except NoSuchElementException:
+            fax = None
         try:
             website = self.driver.find_element(
                 By.CSS_SELECTOR,
@@ -116,6 +126,7 @@ class MedCentersParser:
                 'phone': phone,
                 'email': email,
                 'website': website,
+                'fax': fax,
             }
             Info.objects.get_or_create(
                 name=name,
@@ -155,13 +166,14 @@ class MedCentersParser:
                 'address': address,
                 'phone': phone,
                 'email': email,
+                'fax': fax,
                 'website': website,
                 'practitioner_name': practitioner_name,
                 'practitioner_profession': practitioner_profession,
                 'practitioner_sex': practitioner_sex,
                 'practitioner_lang': practitioner_lang,
             }
-            # print(defaults)
+
             Info.objects.get_or_create(
                 name=name,
                 practitioner_name=practitioner_name,

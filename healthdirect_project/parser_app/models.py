@@ -5,6 +5,7 @@ class Info(models.Model):
     name = models.CharField(max_length=256)
     address = models.CharField(max_length=512, null=True, blank=True)
     phone = models.CharField(max_length=256, null=True, blank=True)
+    fax = models.CharField(max_length=256, null=True, blank=True)
     email = models.CharField(max_length=256, null=True, blank=True)
     website = models.CharField(max_length=512, null=True, blank=True)
     practitioner_name = models.CharField(max_length=256, null=True, blank=True)
